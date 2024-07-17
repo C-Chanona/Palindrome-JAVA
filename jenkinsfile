@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clonamos el repositorio
+                git url: 'https://github.com/C-Chanona/Palindrome-JAVA.git', branch: 'main'
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                script {
+                    // Compilamos el código fuente
+                    if (isUnix()) {
+                        sh 'javac -d out src/com/upchiapas/palindrome/*.java src/com/upchiapas/palindrome/Models/*.java'
+                    } else {
+                        bat 'javac -d out src\\com\\upchiapas\\palindrome\\*.java src\\com\\upchiapas\\palindrome\\Models\\*.java'
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    // Compilamos los archivos de prueba
+                    if (isUnix()) {
+                        sh 'javac -cp .:out:Test Test/com/upchiapas/palindrome/models/PalabraTest.java -d out_test'
+                        // Ejecutamos las pruebas
+                        sh 'java -cp .:out:out_test org.junit.runner.JUnitCore com.upchiapas.palindrome.models.PalabraTest'
+                    } else {
+                        bat 'javac -cp .;out;Test Test\\com\\upchiapas\\palindrome\\models\\PalabraTest.java -d out_test'
+                        bat 'java -cp .;out;out_test org.junit.runner.JUnitCore com.upchiapas.palindrome.models.PalabraTest'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Despliegue de la aplicación (no implementado en este ejemplo)'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completado exitosamente'
+        }
+        failure {
+            echo 'Pipeline fallido'
+        }
+    }
+}
